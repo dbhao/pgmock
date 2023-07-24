@@ -1,4 +1,4 @@
-package pgmock_test
+package backend_test
 
 import (
 	"context"
@@ -11,18 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgproto3"
 
-	"github.com/dbhao/pgmock/v5"
+	"github.com/dbhao/pgmock/v5/backend"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestScript(t *testing.T) {
-	script := &pgmock.Script{
-		Steps: pgmock.AcceptUnauthenticatedConnRequestSteps(),
+	script := &backend.Script{
+		Steps: backend.AcceptUnauthenticatedConnRequestSteps(),
 	}
-	script.Steps = append(script.Steps, pgmock.ExpectMessage(&pgproto3.Query{String: "select 42"}))
-	script.Steps = append(script.Steps, pgmock.SendMessage(&pgproto3.RowDescription{
+	script.Steps = append(script.Steps, backend.ExpectMessage(&pgproto3.Query{String: "select 42"}))
+	script.Steps = append(script.Steps, backend.SendMessage(&pgproto3.RowDescription{
 		Fields: []pgproto3.FieldDescription{
 			{
 				Name:                 []byte("?column?"),
@@ -35,12 +35,12 @@ func TestScript(t *testing.T) {
 			},
 		},
 	}))
-	script.Steps = append(script.Steps, pgmock.SendMessage(&pgproto3.DataRow{
+	script.Steps = append(script.Steps, backend.SendMessage(&pgproto3.DataRow{
 		Values: [][]byte{[]byte("42")},
 	}))
-	script.Steps = append(script.Steps, pgmock.SendMessage(&pgproto3.CommandComplete{CommandTag: []byte("SELECT 1")}))
-	script.Steps = append(script.Steps, pgmock.SendMessage(&pgproto3.ReadyForQuery{TxStatus: 'I'}))
-	script.Steps = append(script.Steps, pgmock.ExpectMessage(&pgproto3.Terminate{}))
+	script.Steps = append(script.Steps, backend.SendMessage(&pgproto3.CommandComplete{CommandTag: []byte("SELECT 1")}))
+	script.Steps = append(script.Steps, backend.SendMessage(&pgproto3.ReadyForQuery{TxStatus: 'I'}))
+	script.Steps = append(script.Steps, backend.ExpectMessage(&pgproto3.Terminate{}))
 
 	ln, err := net.Listen("tcp", "127.0.0.1:")
 	require.NoError(t, err)
