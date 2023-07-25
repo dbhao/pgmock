@@ -1,5 +1,5 @@
 // Package pgmock provides the ability to mock a PostgreSQL server.
-package pgmock
+package backend
 
 import (
 	"fmt"
